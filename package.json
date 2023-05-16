@@ -14,8 +14,10 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@treecg/bucketizer-core": "^1.1.7",
     "@treecg/ldes-snapshot": "^0.1.1",
     "@treecg/ldes-timeseries": "file:LDES-timeseries",
-    "@treecg/timeBased-bucketizer": "file:bucketizers/packages/bucketizer-timeBased"
+    "@treecg/timeBased-bucketizer": "file:bucketizers/packages/bucketizer-timeBased",
+    "@treecg/types": "^0.4.3"
   }
 }
