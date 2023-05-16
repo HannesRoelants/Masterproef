@@ -1,0 +1,21 @@
+{
+  "name": "masterproef",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ldes.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@treecg/ldes-snapshot": "^0.1.1",
+    "@treecg/ldes-timeseries": "file:LDES-timeseries",
+    "@treecg/timeBased-bucketizer": "file:bucketizers/packages/bucketizer-timeBased"
+  }
+}
