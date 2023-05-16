@@ -14,10 +14,13 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@rdfjs/types": "^1.1.0",
     "@treecg/bucketizer-core": "^1.1.7",
+    "@treecg/connector-types": "^1.1.9",
     "@treecg/ldes-snapshot": "^0.1.1",
-    "@treecg/ldes-timeseries": "file:LDES-timeseries",
-    "@treecg/timeBased-bucketizer": "file:bucketizers/packages/bucketizer-timeBased",
-    "@treecg/types": "^0.4.3"
+    "@treecg/ldes-timeseries": "^0.0.4",
+    "@treecg/sds-storage-writer-mongo": "^0.0.4",
+    "@treecg/types": "^0.4.3",
+    "n3": "^1.16.4"
   }
 }

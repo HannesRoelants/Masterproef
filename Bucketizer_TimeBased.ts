@@ -8,7 +8,8 @@ import { RelationType, LDES } from '@treecg/types';
 export class TimeBucketizerFactory implements Factory<BucketizerCoreOptions> {
     type: string = "time";
     build(config: BucketizerCoreOptions, state?: any): Bucketizer {
-        return TimeBucketizer.build(config, state)
+        const total = Object.assign(config, { lastTimestamp: new Date().getTime() })
+        return TimeBucketizer.build(total, state);
     }
 
     ldConfig(quads: RDF.Quad[], subject: RDF.Term): BucketizerCoreOptions | void {
@@ -21,8 +22,8 @@ export class TimeBucketizerFactory implements Factory<BucketizerCoreOptions> {
     }
 }
 
-export type TimeInputType = Partial<BucketizerCoreOptions>;
-export class TimeBucketizer extends BucketizerCore<{ lastTimestamp?: number}> {
+export type TimeInputType = Partial<BucketizerCoreOptions,  { lastTimestamp: number}>;
+export class TimeBucketizer extends BucketizerCore<{ lastTimestamp: number}> {
     public pageNumber: number;
     public lastTimestamp: Date;
     public memberCounter: number;
@@ -30,7 +31,7 @@ export class TimeBucketizer extends BucketizerCore<{ lastTimestamp?: number}> {
     private constructor(bucketizerOptions: TimeInputType, state?: any) {
         super(bucketizerOptions);
         this.pageNumber = 0;
-        this.lastTimestamp = state?.lastTimestamp ?? 0;
+        this.lastTimestamp = new Date(Date.parse("2022-04-07T08:08:48Z"));
         this.memberCounter = 0;
 
         if (state) {
@@ -50,13 +51,14 @@ export class TimeBucketizer extends BucketizerCore<{ lastTimestamp?: number}> {
         const out: RDF.Quad[] = [];
 
         const quadTimestamp = this.getQuadTimestamp(quads);
-        if (quadTimestamp && quadTimestamp.getTime() > this.lastTimestamp.getTime() + 3600000) {
+        console.log(this.lastTimestamp)
+        if (quadTimestamp && quadTimestamp.getTime() > this.lastTimestamp.getTime() /*+ 3600000 */) {
             const currentPage = this.pageNumber;
             this.increasePageNumber();
             this.resetMemberCounter();
             this.setLastTimestamp(quadTimestamp);
 
-            const parameters = this.createRelationParameters(this.pageNumber, this.lastTimestamp, this.factory.namedNode('http://www.w3.org/2001/XMLSchema#dateTime'));
+            const parameters = this.createRelationParameters(this.pageNumber, this.lastTimestamp, this.factory.namedNode('http://www.w3.org/ns/sosa/resultTime'));
             this.setHypermediaControls(`${currentPage}`, parameters);
             out.push(...this.expandRelation(`${currentPage}`, parameters));
         }

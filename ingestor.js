@@ -1,9 +1,10 @@
 import { extractMembers } from "@treecg/ldes-snapshot";
 import { storeFromFile, TSMongoDBIngestor } from "@treecg/ldes-timeseries";
+import { Writer } from "n3";
 
 async function main() {
     // load some members
-    const fileName = "/home/hannes/WebstormProjects/Masterproef/LDES-timeseries/data/location-LDES.ttl"
+    const fileName = "C:\\Masterproef\\location-LDES.ttl"
     const ldesIdentifier = "http://localhost:3000/lil/#EventStream"
     const store = await storeFromFile(fileName);
     const members = extractMembers(store, ldesIdentifier);
@@ -16,6 +17,8 @@ async function main() {
         pageSize: 50,
         date: new Date("2022-08-07T08:08:21Z")
     }
+
+    console.log(members);
     const ingestor = new TSMongoDBIngestor({ streamIdentifier: streamIdentifier, viewDescriptionIdentifier: viewDescriptionIdentifier });
 
     await ingestor.instantiate(ldesTSConfig);
