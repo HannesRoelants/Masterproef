@@ -22,17 +22,21 @@ export class TimeBucketizerFactory implements Factory<BucketizerCoreOptions> {
     }
 }
 
-export type TimeInputType = Partial<BucketizerCoreOptions,  { lastTimestamp: number}>;
+export type TimeInputType = Partial<BucketizerCoreOptions> & { lastTimestamp: number, period?: number };
 export class TimeBucketizer extends BucketizerCore<{ lastTimestamp: number}> {
     public pageNumber: number;
     public lastTimestamp: Date;
     public memberCounter: number;
+    private period: number;
+
 
     private constructor(bucketizerOptions: TimeInputType, state?: any) {
         super(bucketizerOptions);
         this.pageNumber = 0;
         this.lastTimestamp = new Date(Date.parse("2022-04-07T08:08:48Z"));
         this.memberCounter = 0;
+        this.period = bucketizerOptions.period || (5 * 60 * 1000); // Default period of 5 minutes
+
 
         if (state) {
             this.importState(state);
@@ -49,10 +53,9 @@ export class TimeBucketizer extends BucketizerCore<{ lastTimestamp: number}> {
 
     public bucketize = (quads: RDF.Quad[], memberId: string): RDF.Quad[] => {
         const out: RDF.Quad[] = [];
-
         const quadTimestamp = this.getQuadTimestamp(quads);
         console.log(this.lastTimestamp)
-        if (quadTimestamp && quadTimestamp.getTime() > this.lastTimestamp.getTime() /*+ 3600000 */) {
+        if (quadTimestamp && quadTimestamp.getTime() > this.lastTimestamp.getTime() + this.period) {
             const currentPage = this.pageNumber;
             this.increasePageNumber();
             this.resetMemberCounter();
