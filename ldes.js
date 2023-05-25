@@ -17,6 +17,12 @@ async function main() {
 
     const streamIdentifier = "http://example.org/myStream#eventStream"
 
+    function shuffle(array) {
+        array.sort(() => Math.random() - 0.5);
+    }
+
+    shuffle(members);
+
     // Ingestor Arthur Vercruysse
     const dataSteam = new SimpleStream();
     const metadataStream = new SimpleStream();
@@ -53,23 +59,39 @@ async function main() {
             ];
             sds:carries [ a sds:Member ]; 
             sds:dataset :dataset.
-    `   );
-
+    `);
     await metadataStream.push(metadata);
 
     await new Promise(res => setTimeout(res, 2000));
 
     const factory = new TimeBucketizerFactory();
-    const options = {
-        type: "time", // Specify the bucketizer type
-        lastTimestamp: new Date().getTime(),
-        period: 7 * 60 * 1000 // Set the desired period value (e.g., 10 minutes)
-    };
-    const bucketizer = factory.build(options);
 
-    // Bucketize the members using the bucketizer
+
+        let minTimestamp = Infinity;
+        const option_buck = {
+            type: "time", // Specify the bucketizer type
+            lastTimestamp: new Date().getTime(),
+        }
+        const buck = factory.build(option_buck);
+
+        for (const member of members) {
+            const quadTimestamp = buck.getQuadTimestamp(member.quads);
+            if (quadTimestamp && quadTimestamp< minTimestamp) {
+                minTimestamp = quadTimestamp;
+            }
+        }
+
+        const options = {
+            type: "time", // Specify the bucketizer type
+            lastTimestamp: new Date().getTime(),
+            period: 7 * 60 * 1000, // Set the desired period value (e.g., 10 minutes)
+            minTimestamp: minTimestamp
+        };
+
+        const bucketizer = factory.build(options);
+
     for (let member of members) {
-        const extra = await bucketizer.bucketize(member.quads, member.id.value);
+        const extra = await bucketizer.bucketizeNonChronological(member.quads, member.id.value, minTimestamp);
         const subject = extra.find(x => x.predicate.equals(SDS.terms.payload)).subject; // zoeken naar quad waarbij de predicate gelijk is aan de SDS payload (verwijst naar het subjextID van u member)
         extra.push(quad(subject, SDS.terms.stream, namedNode(streamIdentifier)))
         const st = new Writer().quadsToString(extra);
@@ -81,20 +103,7 @@ async function main() {
     }
 
     await ingestPromise;
-    /*
-    Ingestor van Wout Slabbinck -> implementatie nog niet volledig gelukt
-    const bucketizedMembers = await bucketizer.bucketize(members);
-    const ingestor = new TSMongoDBIngestor({ streamIdentifier: streamIdentifier, viewDescriptionIdentifier: viewDescriptionIdentifier });
-
-    await ingestor.instantiate(ldesTSConfig);
-    console.log(bucketizedMembers);
 
 
-    await ingestor.publish(bucketizedMembers);
-
-    await ingestor.exit();
-
-     */
 }
-
 main();
